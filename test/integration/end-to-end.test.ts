@@ -126,24 +126,30 @@ test("weakened ensures: prover still verifies, seal-check FAILS (CHANGED)", () =
   });
 });
 
-test("deleted function: seal-check FAILS (REMOVED)", () => {
+test("deleted function: prover still verifies, seal-check FAILS (REMOVED)", () => {
   requireLsc();
+  assert.ok(HAS_DAFNY, NEED_DAFNY);
   withFixture(FIXTURE, (file) => {
     const lock = seal(file);
     // delete clampLow entirely; inc is untouched.
     writeFileSync(file, FIXTURE.split("export function clampLow")[0].trimEnd() + "\n");
+    // the remaining module still verifies — the prover has nothing to say about a vanished guarantee.
+    assert.match(reverify(file), /0 errors/, "the module without clampLow should still verify");
     const res = checkLock(guaranteesOf([file]), lock);
     assert.equal(res.problems.length, 1);
     assert.match(res.problems[0], /^REMOVED: .*inc\.ts:clampLow /);
   });
 });
 
-test("strengthened-in-place contract is also rejected (CHANGED)", () => {
+test("strengthened-in-place: prover still verifies, seal-check FAILS (CHANGED)", () => {
   requireLsc();
+  assert.ok(HAS_DAFNY, NEED_DAFNY);
   withFixture(FIXTURE, (file) => {
     const lock = seal(file);
     // add a (true, stronger) ensures to inc — strengthening in place is still a change.
     writeFileSync(file, FIXTURE.replace("  //@ ensures \\result > x\n", "  //@ ensures \\result > x\n  //@ ensures \\result >= x + 1\n"));
+    // the stronger spec still verifies — the prover is content; the seal still refuses the in-place change.
+    assert.match(reverify(file), /0 errors/, "the stronger spec should still verify");
     const res = checkLock(guaranteesOf([file]), lock);
     assert.equal(res.problems.length, 1);
     assert.match(res.problems[0], /^CHANGED: .*inc\.ts:inc /);
