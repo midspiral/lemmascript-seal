@@ -1,0 +1,53 @@
+{
+  "name": "lemmascript-seal",
+  "version": "0.1.0",
+  "description": "Append-only guarantee ledger for LemmaScript: freeze each verified function's contract so it can be added to but never silently weakened or removed across edits.",
+  "keywords": [
+    "lemmascript",
+    "formal-verification",
+    "verification",
+    "verified",
+    "typescript",
+    "specification",
+    "design-by-contract",
+    "monotonicity",
+    "append-only",
+    "ledger",
+    "self-modifying",
+    "llm"
+  ],
+  "license": "MIT",
+  "author": "midspiral <hello@midspiral.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/midspiral/lemmascript-seal.git"
+  },
+  "homepage": "https://github.com/midspiral/lemmascript-seal#readme",
+  "bugs": "https://github.com/midspiral/lemmascript-seal/issues",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "lemmascript-seal": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.22.4",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "lemmascript": ">=0.5.7"
+  }
+}
