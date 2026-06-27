@@ -134,6 +134,20 @@ What the seal does **not** do, so it isn't over-trusted:
 The defense is a small, reviewable artifact plus a structural append-only rule — not
 tamper-proofing.
 
+## Tests
+
+```sh
+npm test                 # pure unit tests over the ledger core — no toolchain, runs anywhere
+npm run test:integration # end-to-end: real `lsc` + Dafny (test/integration/)
+```
+
+`npm test` is self-contained (the append-only logic over fixtures). The integration suite runs
+the real story — seal a verified file, weaken/delete/change a contract, watch the prover still
+verify while `check` fails — so it needs `lsc` (`$LEMMASCRIPT` or a global `lemmascript`) and
+`dafny`. It lives in its own dir so `npm test` keeps a clean glob, and it is **never skipped**:
+a missing toolchain *fails* it rather than passing green, because a fail-to-run must not read as
+success.
+
 ## License
 
 MIT

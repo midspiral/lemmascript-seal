@@ -3,9 +3,14 @@
 // The freeze is only as good as the file list it covers: if `seal` and `check`
 // (and the consumer's `verify`) carry separately-maintained lists, they drift —
 // a verified file silently never gets frozen. So scopes are derived from a
-// single list file (one path per line; `#` comments and blanks ignored).
-// Explicit CLI args override it. `lemmascript-seal files` prints the resolved
-// list so a `verify` script can consume the SAME source.
+// single list file. Explicit CLI args override it. `lemmascript-seal files`
+// prints the resolved list so a `verify` script can consume the SAME source.
+//
+// Format matches the LemmaScript toolchain's `check.sh`:
+//   filepath [timeout_in_seconds] [extra dafny flags...]
+// i.e. the first whitespace-delimited token is the path; any trailing
+// timeout/flags belong to `verify`, not to us, so we drop them. (We also
+// tolerate `#` comments and blank lines.)
 import { existsSync, readFileSync } from "node:fs";
 
 /** Default list filenames, in precedence order. */
@@ -15,7 +20,8 @@ export function parseList(text: string): string[] {
   return text
     .split("\n")
     .map((l) => l.replace(/#.*$/, "").trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((l) => l.split(/\s+/)[0]); // first token = filepath; ignore [timeout] [flags]
 }
 
 /**
