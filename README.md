@@ -5,8 +5,8 @@ TypeScript. It freezes each verified function's *contract* so that, across edits
 guarantee may be **added to** but **never silently changed or removed**.
 
 ```sh
-lemmascript-seal seal   # (re)write SEALED.lock — append-only
-lemmascript-seal check  # fail if any sealed contract changed or disappeared
+npx tsx ../lemmascript-seal/src/cli.ts seal   # (re)write SEALED.lock — append-only
+npx tsx ../lemmascript-seal/src/cli.ts check  # fail if any sealed contract changed or disappeared
 ```
 
 ## The problem it solves
@@ -38,26 +38,14 @@ Contracts are read from `lsc info` (LemmaScript's AST-derived frontend), so the 
 cause a false trip (`requires`/`ensures` are sorted before hashing; a contract is a
 conjunction, so clause order is irrelevant).
 
-## Install
-
-```sh
-npm i -D lemmascript-seal
-```
-
-It shells out to `lsc info`, so it needs a LemmaScript toolchain:
-
-- **default:** `lsc` on your `PATH` (`npm i -g lemmascript`);
-- **dev override:** set `$LEMMASCRIPT` to a sibling checkout — it's run through `tsx`:
-  ```sh
-  LEMMASCRIPT=../LemmaScript lemmascript-seal check
-  ```
-
 ## Usage
 
+Run from a sibling checkout of this repo:
+
 ```sh
-lemmascript-seal seal  [files...] [--files <list>] [--lock <path>]
-lemmascript-seal check [files...] [--files <list>] [--lock <path>] [--strict]
-lemmascript-seal files [--files <list>]
+npx tsx ../lemmascript-seal/src/cli.ts seal  [files...] [--files <list>] [--lock <path>]
+npx tsx ../lemmascript-seal/src/cli.ts check [files...] [--files <list>] [--lock <path>] [--strict]
+npx tsx ../lemmascript-seal/src/cli.ts files [--files <list>]
 ```
 
 - **`seal`** — write the ledger (default `SEALED.lock`), append-only. Admits new symbols;
@@ -67,6 +55,13 @@ lemmascript-seal files [--files <list>]
   in the ledger are a non-failing notice; `--strict` makes them a failure.
 - **`files`** — print the resolved verified-file list (so a `verify` script can read the
   *same* source of truth).
+
+It shells out to `lsc info`, so it needs a LemmaScript toolchain: `lsc` on your `PATH`
+(`npm i -g lemmascript`), or `$LEMMASCRIPT` pointing at a sibling checkout:
+
+```sh
+LEMMASCRIPT=../LemmaScript npx tsx ../lemmascript-seal/src/cli.ts check
+```
 
 ### One source of truth for the file set
 
@@ -79,7 +74,7 @@ and blanks ignored), resolved as:
 2. `--files <path>`, else
 3. `./lemmascript-files.txt`, else `./LemmaScript-files.txt`.
 
-`seal` and `check` always resolve the same set; `lemmascript-seal files` lets `verify`
+`seal` and `check` always resolve the same set; the `files` subcommand lets `verify`
 consume it too.
 
 ## The monotonicity rule
@@ -102,11 +97,11 @@ intact. Guarantees accumulate; they never retract.
 
 ```sh
 # author: edit the .ts contracts → gen → verify (the prover) → freeze new guarantees
-lemmascript-seal seal
+npx tsx ../lemmascript-seal/src/cli.ts seal
 git commit            # wire `check` into a pre-commit hook / CI
 
 # CI / pre-push: nothing weakened, and nothing verified is left unfrozen
-lemmascript-seal check --strict
+npx tsx ../lemmascript-seal/src/cli.ts check --strict
 ```
 
 A typical gate runs `check` → prover `verify` → tests. Put the fast `check` on every commit;
